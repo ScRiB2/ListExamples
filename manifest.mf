@@ -1,0 +1,2 @@
+Main-Class: com.scrib.Main
+Class-Path: bin/
