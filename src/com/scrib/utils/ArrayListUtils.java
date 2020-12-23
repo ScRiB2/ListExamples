@@ -1,10 +1,8 @@
 package com.scrib.utils;
 
-import com.scrib.classes.Box;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.function.Function;
 
 public class ArrayListUtils {
 

@@ -1,109 +1,137 @@
 package com.scrib;
 
+import com.scrib.gui.FirstTaskFrame;
+import com.scrib.gui.SecondTaskFrame;
+import com.scrib.gui.ThirdTaskFrame;
+import com.scrib.tasks.FirstTaskWorker;
+import com.scrib.tasks.SecondTaskWorker;
+import com.scrib.tasks.ThirdTaskWorker;
 
-import com.scrib.classes.Box;
-import com.scrib.utils.ArrayListUtils;
-import com.scrib.utils.FileWorker;
+import javax.swing.*;
+import java.awt.*;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
 
+class MainFrame {
+    JFrame jfrm;
+
+    public MainFrame() {
+        jfrm = new JFrame("MainFrame");
+        jfrm.getContentPane().setLayout(new FlowLayout());
+        jfrm.setSize(270, 150);
+        jfrm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        JButton firstTaskButton = new JButton("1 task");
+        firstTaskButton.addActionListener(e -> new FirstTaskFrame());
+
+        JButton secondTaskButton = new JButton("2 task");
+        secondTaskButton.addActionListener(e -> new SecondTaskFrame());
+
+        JButton threeTaskButton = new JButton("3 task");
+        threeTaskButton.addActionListener(e -> new ThirdTaskFrame());
+
+        JPanel panel = new JPanel();
+        panel.add(firstTaskButton);
+        panel.add(secondTaskButton);
+        panel.add(threeTaskButton);
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        jfrm.getContentPane().add(panel);
+        jfrm.setLocationRelativeTo(null);
+        jfrm.setVisible(true);
+    }
+}
 
 public class Main {
 
     public static void main(String[] args) {
-        if (args.length < 2) {
-            System.out.println("File paths not entered");
-            return;
+        boolean isGUI = false;
+        for (String arg : args) {
+            if (arg.equals("-w")) {
+                isGUI = true;
+                break;
+            }
         }
-        String inputPath = args[0];
-        String outputPath = args[1];
-
-        try {
-            ArrayList<String> lines = FileWorker.readLinesFromFile(inputPath);
-
-            if (lines.size() == 0) {
-                System.out.println("No input data");
+        if (isGUI) {
+            SwingUtilities.invokeLater(MainFrame::new);
+        } else {
+            if (args.length < 2) {
+                System.out.println("File paths not entered");
                 return;
             }
+            String inputPath = "";
+            String outputPath = "";
+            int taskNumber = -1;
+            for (int i = 0; i < args.length; i++) {
+                if (args[i].equals("-t")) {
+                    boolean isValidTask = false;
+                    if (i + 1 <= args.length - 1) {
+                        String taskData = args[i + 1];
+                        try {
+                            int tempNumber = Integer.parseInt(taskData);
+                            if (tempNumber > 0 && tempNumber < 4) {
+                                isValidTask = true;
+                                taskNumber = tempNumber;
+                            }
+                        } catch (NumberFormatException ignore) {
 
-            ArrayList<Box> boxes = new ArrayList<>();
-
-            for (String line : lines) {
-                ArrayList<Integer> tempLine = ArrayListUtils.getNumbersFromLine(line, " ");
-
-                if (tempLine.size() != 3) {
-                    System.out.println("Error in input data");
-                    return;
-                }
-                for (Integer number : tempLine) {
-                    if (number <= 0) {
-                        System.out.println("Error in input data");
+                        }
+                    }
+                    if (!isValidTask) {
+                        System.out.println("Task number is incorrect");
                         return;
                     }
                 }
-                boxes.add(new Box(tempLine.get(0), tempLine.get(1), tempLine.get(2)));
-            }
 
-            ArrayList<Box> sortedByVolume = ArrayListUtils.sortArrayList(
-                    boxes,
-                    ((o1, o2) -> {
-                        if (o1.getVolume() > o2.getVolume()) return 1;
-                        else if (o1.getVolume() < o2.getVolume()) return -1;
-                        return 0;
-                    }),
-                    ArrayListUtils.Order.ASC, false
-            );
-
-            if (sortedByVolume.size() == 1) {
-                Box resultBox = sortedByVolume.get(0);
-                FileWorker.writeLineToFile(outputPath, resultBox.toString());
-            }
-
-            ArrayList<Box> result = finalSort(sortedByVolume);
-
-
-            StringBuilder listString = new StringBuilder();
-            for (Box box : result) {
-                listString.append(box.toString()).append("\n");
-            }
-
-            FileWorker.writeLineToFile(outputPath, listString.toString());
-
-        } catch (NumberFormatException e) {
-            System.out.println("Error in input data");
-        } catch (IOException e) {
-            System.out.println("Error reading input file");
-        }
-    }
-
-    public static ArrayList<Box> finalSort(ArrayList<Box> array) {
-        ArrayList<Box> result = new ArrayList<>();
-
-
-        for (int i = 1; i < array.size(); i++) {
-            Box prev = array.get(i - 1);
-            Box curr = array.get(i);
-            if (prev.getVolume() != curr.getVolume()) {
-                result.add(array.get(i - 1));
-            } else {
-                int compareResult = prev.compareBy(Box.Selectors.BIG_SIDE, ArrayListUtils.Order.ASC, curr);
-                if (compareResult == 0) {
-                    compareResult = prev.compareBy(Box.Selectors.SMALLER_SIDE, ArrayListUtils.Order.DESC, curr);
+                if (args[i].equals("-o")) {
+                    boolean isValidInput = false;
+                    if (i + 1 <= args.length - 1) {
+                        outputPath = args[i + 1];
+                        isValidInput = true;
+                    }
+                    if (!isValidInput) {
+                        System.out.println("Input path is incorrect");
+                        return;
+                    }
                 }
-                if (compareResult == -1) {
-                    result.add(prev);
-                    result.add(curr);
-                } else {
-                    result.add(curr);
-                    result.add(prev);
+
+                if (args[i].equals("-i")) {
+                    boolean isValidInput = false;
+                    if (i + 1 <= args.length - 1) {
+                        inputPath = args[i + 1];
+                        isValidInput = true;
+                    }
+                    if (!isValidInput) {
+                        System.out.println("Input path is incorrect");
+                        return;
+                    }
                 }
-                i++;
+            }
+
+            if (taskNumber == -1){
+                System.out.println("Task number not specified (-t)");
+                return;
+            }
+            if (inputPath.isEmpty()) {
+                System.out.println("Input path not specified (-i)");
+                return;
+            }
+            if (outputPath.isEmpty()) {
+                System.out.println("Output path not specified (-o)");
+                return;
+            }
+            String[] paths = new String[2];
+            paths[0] = inputPath;
+            paths[1] = outputPath;
+            switch (taskNumber) {
+                case 1 -> {
+                    FirstTaskWorker.run(paths);
+                }
+                case 2 -> {
+                    SecondTaskWorker.run(paths);
+                }
+                case 3 -> {
+                    ThirdTaskWorker.run(paths);
+                }
             }
         }
-
-        if (result.size() != array.size()) result.add(array.get(array.size() - 1));
-        return result;
     }
 }
