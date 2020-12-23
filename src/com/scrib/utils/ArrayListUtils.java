@@ -97,8 +97,10 @@ public class ArrayListUtils {
         int length = 1;
         int tempStartIndex = 0;
         int tempEndIndex = 1;
+        boolean isUpper = true;
         for (int i = 1; i < sortedArray.size(); i++) {
             if (sortedArray.get(i) - sortedArray.get(i - 1) != 1) {
+                isUpper = false;
                 int diff = tempEndIndex - tempStartIndex;
                 if (diff > length) {
                     length = diff;
@@ -109,6 +111,7 @@ public class ArrayListUtils {
             }
             tempEndIndex = i + 1;
         }
+        if (isUpper) endIndex = tempEndIndex;
         for (int i = startIndex; i < endIndex; i++) {
             sequence.add(sortedArray.get(i));
         }
