@@ -53,10 +53,6 @@ public class Main {
         if (isGUI) {
             SwingUtilities.invokeLater(MainFrame::new);
         } else {
-            if (args.length < 2) {
-                System.out.println("File paths not entered");
-                return;
-            }
             String inputPath = "";
             String outputPath = "";
             int taskNumber = -1;
